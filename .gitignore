@@ -7,6 +7,12 @@
 node_modules/
 dist/
 
+# Ignore .env files
+/.env
+/dev.env
+/stag.env
+/prod.env
+
 # Compiled Java class files
 *.class
 
