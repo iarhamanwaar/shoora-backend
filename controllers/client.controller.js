@@ -1,4 +1,61 @@
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const Client = require("../models/client.model");
+
+// Signup controller
+exports.signup = async (req, res) => {
+  try {
+    const { fullName, dob, email, password } = req.body;
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Save the client to the database
+    const client = await Client.create({
+      fullName,
+      dob,
+      email,
+      password: hashedPassword,
+    });
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { clientId: client.id },
+      process.env.JWT_ACCESS_SECRET
+    );
+
+    res.status(201).json({ message: "Signup successful", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Signup failed" });
+  }
+};
+
+// Login controller
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find the client in the database by email
+    const client = await Client.findOne({ where: { email } });
+
+    // If client not found or password does not match
+    if (!client || !(await bcrypt.compare(password, client.password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { clientId: client.id },
+      process.env.JWT_ACCESS_SECRET
+    );
+
+    res.status(200).json({ message: "Login successful", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Login failed" });
+  }
+};
 
 // Create a new client
 exports.createClient = async (req, res) => {

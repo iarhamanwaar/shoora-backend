@@ -1,4 +1,74 @@
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const Consultant = require("../models/consultant.model");
+
+// Signup controller
+exports.signup = async (req, res) => {
+  try {
+    const {
+      fullName,
+      dob,
+      license,
+      certificates,
+      mobile,
+      email,
+      password,
+      photo,
+    } = req.body;
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Save the consultant to the database
+    const consultant = await Consultant.create({
+      fullName,
+      dob,
+      license,
+      certificates,
+      mobile,
+      email,
+      password: hashedPassword,
+      photo,
+    });
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { consultantId: consultant.id },
+      process.env.JWT_ACCESS_SECRET
+    );
+
+    res.status(201).json({ message: "Signup successful", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Signup failed" });
+  }
+};
+
+// Login controller
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find the consultant in the database by email
+    const consultant = await Consultant.findOne({ where: { email } });
+
+    // If consultant not found or password does not match
+    if (!consultant || !(await bcrypt.compare(password, consultant.password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { consultantId: consultant.id },
+      process.env.JWT_ACCESS_SECRET
+    );
+
+    res.status(200).json({ message: "Login successful", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Login failed" });
+  }
+};
 
 // Create a new consultant
 exports.createConsultant = async (req, res) => {

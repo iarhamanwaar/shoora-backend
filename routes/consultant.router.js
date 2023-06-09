@@ -17,4 +17,10 @@ router.put("/:id", consultantController.updateConsultant);
 // Delete a consultant by ID
 router.delete("/:id", consultantController.deleteConsultant);
 
+// Signup route
+router.post("/signup", consultantController.signup);
+
+// Login route
+router.post("/login", consultantController.login);
+
 module.exports = router;

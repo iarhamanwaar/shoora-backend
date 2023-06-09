@@ -17,4 +17,10 @@ router.put("/:id", clientController.updateClient);
 // Delete a client by ID
 router.delete("/:id", clientController.deleteClient);
 
+// Signup route
+router.post("/signup", clientController.signup);
+
+// Login route
+router.post("/login", clientController.login);
+
 module.exports = router;
