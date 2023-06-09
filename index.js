@@ -1,18 +1,10 @@
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
 
-// configure to get env
-const configureEnvironment = require("./config/config");
-
-// Determine the current environment based on server configuration
-// Default to 'development' if NODE_ENV is not set
-const environment = process.env.NODE_ENV || "development";
-
-// Load environment-specific configuration
-configureEnvironment(environment);
-
 // connecting to db
-const sequelize = require("./database/connection");
+require("./database/connection");
 
 // importing middleware
 const bodyParserMiddleware = require("./middleware/body-parser");
