@@ -1,32 +1,28 @@
 const { Sequelize } = require("sequelize");
 
-// Create a new Sequelize instance
-const sequelize = new Sequelize(env.database, env.username, env.password, {
-  host: env.host,
-  port: env.port,
-  dialect: env.dialect,
-  // operatorsAliases: false,
+const url = process.env.DATABASE_URI;
 
-  // pool: {
-  //   max: env.max,
-  //   min: env.pool.min,
-  //   acquire: env.pool.acquire,
-  //   idle: env.pool.idle
-  // }
+// Create a new Sequelize instance
+const sequelize = new Sequelize(url, {
+  dialect: "postgres",
 });
 
-// Test the database connection
-sequelize
-  .authenticate()
-  .then(() => {
+// Test the database connection and synchronize the models
+async function initializeDatabase() {
+  try {
+    await sequelize.authenticate(); // Test the database connection
     console.log(
-      `PostgrsSQL Database connection has been established successfully.`.yellow
-        .bold
+      "PostgreSQL Database connection has been established successfully."
     );
-  })
-  .catch((error) => {
+
+    await sequelize.sync({ force: false }); // Automatically create missing tables
+    console.log("Database tables have been synchronized.");
+  } catch (error) {
     console.error("Unable to connect to the database:", error);
-  });
+  }
+}
+
+initializeDatabase();
 
 // Export the database connection
 module.exports = sequelize;
